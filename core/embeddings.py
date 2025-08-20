@@ -1,26 +1,28 @@
-from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import SentenceTransformer
+import numpy as np
 from utils.config import EMBEDDING_MODEL
 
-def run():
-    model = SentenceTransformer(EMBEDDING_MODEL)
+# load model once
+_MODEL = None
 
-    authentic_samples = [
-        "I took this photo during my trip to Paris in the summer of 2019.",
-        "The conference was held in Mumbai and featured over 300 local entrepreneurs."
-    ]
+def _get_model():
+    global _MODEL
+    if _MODEL is None:
+        _MODEL = SentenceTransformer(EMBEDDING_MODEL)
+    return _MODEL
 
-    ai_generated_samples = [
-        "This picturesque scene captures the ethereal charm of a sun-kissed Parisian morning.",
-        "In a remarkable convergence of minds, the Mumbai conference unveiled unprecedented entrepreneurial synergy."
-    ]
+def get_embeddings(texts, convert_to_numpy=True):
+    """
+    texts: list[str] or str
+    returns: np.ndarray (n, dim)
+    """
+    single = False
+    if isinstance(texts, str):
+        texts = [texts]
+        single = True
 
-    auth_embeddings = model.encode(authentic_samples, convert_to_tensor=True)
-    ai_embeddings = model.encode(ai_generated_samples, convert_to_tensor=True)
-
-    print("\n=== Cosine Similarities Between Authentic & AI-Generated ===")
-    for i, auth_text in enumerate(authentic_samples):
-        for j, ai_text in enumerate(ai_generated_samples):
-            similarity = util.cos_sim(auth_embeddings[i], ai_embeddings[j]).item()
-            print(f"\nAuthentic: {auth_text}\nAI-Generated: {ai_text}\nSimilarity: {similarity:.4f}")
-
-    print("\nEmbedding Vector Size:", auth_embeddings.shape[1])
+    model = _get_model()
+    emb = model.encode(texts, convert_to_numpy=True, normalize_embeddings=True)
+    if single:
+        return emb[0]
+    return emb
