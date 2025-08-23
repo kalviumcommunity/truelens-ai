@@ -1,7 +1,7 @@
 # main.py
 import argparse
 from core import embeddings
-from features import zero_shot, rag, one_shot, few_shot, multi_shot
+from features import zero_shot, rag, one_shot, few_shot, multi_shot, dynamic_prompting
 
 def run_feature(feature_name):
     if feature_name == "zero_shot":
@@ -16,6 +16,8 @@ def run_feature(feature_name):
         embeddings.run()
     elif feature_name == "rag":
         rag.run()
+    elif feature_name == "dynamic_prompting":
+        dynamic_prompting.run()
     else:
         print(f"❌ Unknown feature: {feature_name}")
 
