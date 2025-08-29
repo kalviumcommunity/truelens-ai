@@ -29,7 +29,7 @@ def ensure_index():
     build_faiss_index(embs, metadatas)
     print("Built FAISS index with sample DB.")
 
-def run_query_with_rag(query_text: str, top_k: int = 4):
+def run_query_with_rag(query_text: str, top_k: int = 4, temperature: float = 0.2):
     ensure_index()
     # embed query
     q_emb = get_embeddings(query_text)  # vector
@@ -59,7 +59,7 @@ def run_query_with_rag(query_text: str, top_k: int = 4):
             {"role": "system", "content": "You are a helpful text authenticity classifier."},
             {"role": "user", "content": prompt}
         ],
-        temperature=0.2,
+        temperature=temperature,
         max_tokens=400
     )
     # Groq SDK returns choice.message as object
@@ -88,7 +88,7 @@ def run_query_with_rag(query_text: str, top_k: int = 4):
     }
     return result
 
-def run():
+def run(temperature: float = 0.2):
     # interactive demo with a few queries
     examples = [
         "I took this photo during my trip to Paris in the summer of 2019.",
@@ -98,7 +98,7 @@ def run():
     for q in examples:
         print("\n===== QUERY =====")
         print(q)
-        out = run_query_with_rag(q, top_k=3)
+        out = run_query_with_rag(q, top_k=3, temperature=temperature)
         print("\n=== RAG RESULT ===")
         print(json.dumps(out["parsed"], indent=2))
         print("\n( Raw model output )\n", out["model_raw"])
